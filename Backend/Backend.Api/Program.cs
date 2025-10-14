@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Backend.Api.Services.Embedding;
-using Backend.Api.Services.VectorDatabase;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
