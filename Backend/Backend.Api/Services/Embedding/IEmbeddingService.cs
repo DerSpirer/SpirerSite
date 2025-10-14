@@ -1,4 +1,4 @@
-namespace Backend.Api.Services;
+namespace Backend.Api.Services.Embedding;
 
 /// <summary>
 /// Interface for generating text embeddings using OpenAI

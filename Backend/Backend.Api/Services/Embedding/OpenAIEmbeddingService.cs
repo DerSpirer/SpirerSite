@@ -1,18 +1,18 @@
 using OpenAI;
 using OpenAI.Embeddings;
 
-namespace Backend.Api.Services;
+namespace Backend.Api.Services.Embedding;
 
 /// <summary>
 /// Service for generating text embeddings using OpenAI API
 /// </summary>
-public class EmbeddingService : IEmbeddingService
+public class OpenAIEmbeddingService : IEmbeddingService
 {
     private readonly EmbeddingClient _embeddingClient;
-    private readonly ILogger<EmbeddingService> _logger;
+    private readonly ILogger<OpenAIEmbeddingService> _logger;
     private readonly string _embeddingModel;
 
-    public EmbeddingService(IConfiguration configuration, ILogger<EmbeddingService> logger)
+    public OpenAIEmbeddingService(IConfiguration configuration, ILogger<OpenAIEmbeddingService> logger)
     {
         _logger = logger;
         
@@ -23,7 +23,7 @@ public class EmbeddingService : IEmbeddingService
         
         _embeddingClient = new EmbeddingClient(_embeddingModel, apiKey);
         
-        _logger.LogInformation("EmbeddingService initialized with model: {Model}", _embeddingModel);
+        _logger.LogInformation("OpenAIEmbeddingService initialized with model: {Model}", _embeddingModel);
     }
 
     /// <inheritdoc />
