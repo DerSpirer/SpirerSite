@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Backend.Api.Services.Agent;
 using Backend.Api.Services.Embedding;
 using Scalar.AspNetCore;
 
@@ -12,10 +13,13 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpClient();
+
 // Register Secrets Service
 string keyVaultUrl = builder.Configuration["AZURE_KEY_VAULT_URL"] ?? throw new InvalidOperationException("AZURE_KEY_VAULT_URL is not set");
 builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), new DefaultAzureCredential());
-builder.Services.AddSingleton<IEmbeddingService, OpenAIEmbeddingService>();
+builder.Services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
+builder.Services.AddScoped<IAgentService, OpenAIAgentService>();
 
 var app = builder.Build();
 
