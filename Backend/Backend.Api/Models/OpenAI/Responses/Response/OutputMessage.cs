@@ -1,5 +1,6 @@
 using Backend.Api.Models.Agent;
 using Backend.Api.Models.OpenAI.Requests;
+using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
 namespace Backend.Api.Models.OpenAI.Responses.Response;
@@ -9,6 +10,7 @@ namespace Backend.Api.Models.OpenAI.Responses.Response;
 /// </summary>
 public class OutputMessage : OutputItem
 {
+    [JsonConverter(typeof(ContentItemListConverter))]
     public List<ContentItem>? content { get; set; }
     public MessageRole? role { get; set; }
 }

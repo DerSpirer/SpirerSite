@@ -1,3 +1,6 @@
+using Backend.Api.Models.OpenAI.Converters;
+using Newtonsoft.Json;
+
 namespace Backend.Api.Models.OpenAI.Responses.Response;
 
 /// <summary>
@@ -11,6 +14,7 @@ public class Response
     public IncompleteDetails? incomplete_details { get; set; }
     public required string model { get; set; }
     public required string @object { get; set; }
+    [JsonConverter(typeof(OutputItemListConverter))]
     public List<OutputItem>? output { get; set; }
     public required string status { get; set; }
     public Usage? usage { get; set; }
