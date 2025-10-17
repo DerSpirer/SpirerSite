@@ -16,9 +16,9 @@ public class OutputItemConverter : JsonConverter<OutputItem>
 
         OutputItem? item = type switch
         {
-            "message" => jsonObject.ToObject<OutputMessage>(),
-            "function_call" => jsonObject.ToObject<FunctionToolCall>(),
-            "reasoning" => jsonObject.ToObject<ReasoningOutput>(),
+            "message" => jsonObject.ToObject<OutputMessage>(serializer),
+            "function_call" => jsonObject.ToObject<FunctionToolCall>(serializer),
+            "reasoning" => jsonObject.ToObject<ReasoningOutput>(serializer),
             _ => null
         };
 

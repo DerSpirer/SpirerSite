@@ -1,3 +1,4 @@
+using Backend.Api.Models.Agent;
 using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
@@ -16,7 +17,7 @@ public class Response
     public required string @object { get; set; }
     [JsonConverter(typeof(OutputItemListConverter))]
     public List<OutputItem>? output { get; set; }
-    public required string status { get; set; }
+    public required Status status { get; set; }
     public Usage? usage { get; set; }
 }
 
