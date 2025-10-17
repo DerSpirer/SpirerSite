@@ -50,13 +50,13 @@ public class OpenAIAgentService : IAgentService
         // Read the stream using OpenAIStreamReader and yield response chunks as they arrive
         Stream stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken);
 
-        throw new NotImplementedException();
+        yield break;
     }
     private async Task<HttpResponseMessage> SendCreateResponseRequest(string input, string? previousResponseId = null, CancellationToken cancellationToken = default)
     {
         CreateResponseRequest request = new CreateResponseRequest
         {
-            input = input,
+            input = new List<InputMessage> { new InputMessage { role = MessageRole.User, content = input } },
             previous_response_id = previousResponseId
         };
 

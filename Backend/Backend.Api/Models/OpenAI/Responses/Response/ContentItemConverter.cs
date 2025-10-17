@@ -17,6 +17,7 @@ public class ContentItemConverter : JsonConverter<ContentItem>
         {
             "output_text" => jsonObject.ToObject<OutputText>(),
             "refusal" => jsonObject.ToObject<Refusal>(),
+            "reasoning_text" => jsonObject.ToObject<ReasoningTextContent>(),
             _ => null
         };
 

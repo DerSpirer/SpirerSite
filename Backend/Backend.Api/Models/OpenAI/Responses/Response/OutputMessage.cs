@@ -26,7 +26,6 @@ public abstract class ContentItem
 public class OutputText : ContentItem
 {
     public required string text { get; set; }
-    public List<object>? annotations { get; set; }
 }
 
 /// <summary>
@@ -35,5 +34,13 @@ public class OutputText : ContentItem
 public class Refusal : ContentItem
 {
     public required string refusal { get; set; }
+}
+
+/// <summary>
+/// Reasoning text content from the model (used in streaming)
+/// </summary>
+public class ReasoningTextContent : ContentItem
+{
+    public required string text { get; set; }
 }
 
