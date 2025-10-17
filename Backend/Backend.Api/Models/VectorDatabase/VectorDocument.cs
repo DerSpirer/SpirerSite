@@ -1,4 +1,4 @@
-namespace Backend.Api.Models;
+namespace Backend.Api.Models.VectorDatabase;
 
 /// <summary>
 /// Represents a document with vector embeddings for storage and retrieval in a vector database

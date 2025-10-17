@@ -1,10 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using Backend.Api.Enums;
-using Backend.Api.Models.Core;
-using Backend.Api.Models.OpenAI.Request;
+using Backend.Api.Models.Agent;
+using Backend.Api.Models.OpenAI.Requests;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Backend.Api.Services.Agent;
 
@@ -39,7 +38,7 @@ public class OpenAIAgentService : IAgentService
         _logger.LogInformation("OpenAIAgentService initialized.");
     }
 
-    public async IAsyncEnumerable<Message> GenerateStreamingResponseAsync(
+    public async IAsyncEnumerable<ChatResponse> GenerateStreamingResponseAsync(
         string input,
         string? previousResponseId = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -50,12 +49,8 @@ public class OpenAIAgentService : IAgentService
 
         // Read the stream using OpenAIStreamReader and yield response chunks as they arrive
         Stream stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken);
-        using OpenAIStreamReader streamReader = new OpenAIStreamReader(stream, _logger);
 
-        await foreach (Message partialMessage in streamReader.ReadStreamAsync(cancellationToken))
-        {
-            yield return partialMessage;
-        }
+        throw new NotImplementedException();
     }
     private async Task<HttpResponseMessage> SendCreateResponseRequest(string input, string? previousResponseId = null, CancellationToken cancellationToken = default)
     {

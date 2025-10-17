@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Backend.Api.Models.Core;
+namespace Backend.Api.Models.Agent;
 
 /// <summary>
 /// Shared status enum with OpenAI

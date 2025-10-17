@@ -1,4 +1,4 @@
-namespace Backend.Api.Models;
+namespace Backend.Api.Models.VectorDatabase;
 
 /// <summary>
 /// Represents a search result from a vector database query

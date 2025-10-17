@@ -1,4 +1,4 @@
-using Backend.Api.Models;
+using Backend.Api.Models.VectorDatabase;
 using Backend.Api.Services.Embedding;
 using Pinecone;
 

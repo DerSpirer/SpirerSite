@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Api.Models.Dto;
+namespace Backend.Api.Models.Agent;
 
 /// <summary>
 /// Request model for chat endpoint

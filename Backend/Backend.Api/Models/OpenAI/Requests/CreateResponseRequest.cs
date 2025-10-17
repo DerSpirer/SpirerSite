@@ -1,7 +1,7 @@
 using Backend.Api.Models.OpenAI.Tools;
 using Newtonsoft.Json;
 
-namespace Backend.Api.Models.OpenAI.Request;
+namespace Backend.Api.Models.OpenAI.Requests;
 
 /// <summary>
 /// Request model for OpenAI Chat Completions API

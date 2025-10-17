@@ -1,5 +1,4 @@
-using Backend.Api.Models.Dto;
-using Backend.Api.Models.Core;
+using Backend.Api.Models.Agent;
 using Backend.Api.Services.Agent;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -46,12 +45,18 @@ public class AgentController : ControllerBase
             Response.Headers.Append("Cache-Control", "no-cache");
             Response.Headers.Append("Connection", "keep-alive");
 
-            await foreach (Message message in _agentService.GenerateStreamingResponseAsync(
+            await foreach (ChatResponse message in _agentService.GenerateStreamingResponseAsync(
                 request.Input,
                 request.PreviousResponseId,
                 cancellationToken))
             {
-                await Response.WriteAsync($"data: {JsonConvert.SerializeObject(message)}\n\n", cancellationToken);
+                // Serialize the message to JSON and write it as a server-sent event
+                string deltaJson = JsonConvert.SerializeObject(message, Formatting.None,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                await Response.WriteAsync($"data: {deltaJson}\n\n", cancellationToken);
                 await Response.Body.FlushAsync(cancellationToken);
             }
 

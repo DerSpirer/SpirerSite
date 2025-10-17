@@ -9,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add OpenTelemetry with Azure Monitor
 builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 

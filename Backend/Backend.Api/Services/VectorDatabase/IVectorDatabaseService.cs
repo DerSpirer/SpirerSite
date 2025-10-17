@@ -1,4 +1,4 @@
-using Backend.Api.Models;
+using Backend.Api.Models.VectorDatabase;
 
 namespace Backend.Api.Services.VectorDatabase;
 
