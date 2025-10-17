@@ -1,7 +1,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Backend.Api.Models.OpenAI.Responses.Response;
 
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Converters;
 
 /// <summary>
 /// JSON converter for polymorphic OutputItem deserialization

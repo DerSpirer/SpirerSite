@@ -1,7 +1,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Backend.Api.Models.OpenAI.Responses.Response;
 
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Converters;
 
 /// <summary>
 /// JSON converter for polymorphic ContentItem deserialization
@@ -10,8 +11,8 @@ public class ContentItemConverter : JsonConverter<ContentItem>
 {
     public override ContentItem? ReadJson(JsonReader reader, Type objectType, ContentItem? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
-        var jsonObject = JObject.Load(reader);
-        var type = jsonObject["type"]?.Value<string>();
+        JObject jsonObject = JObject.Load(reader);
+        string? type = jsonObject["type"]?.Value<string>();
 
         ContentItem? item = type switch
         {

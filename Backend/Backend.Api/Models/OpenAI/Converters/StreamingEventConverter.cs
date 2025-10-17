@@ -1,7 +1,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Backend.Api.Models.OpenAI.Responses.StreamingEvents;
 
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Converters;
 
 /// <summary>
 /// JSON converter for polymorphic StreamingEvent deserialization
@@ -10,8 +11,8 @@ public class StreamingEventConverter : JsonConverter<StreamingEvent>
 {
     public override StreamingEvent? ReadJson(JsonReader reader, Type objectType, StreamingEvent? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
-        var jsonObject = JObject.Load(reader);
-        var type = jsonObject["type"]?.Value<string>();
+        JObject jsonObject = JObject.Load(reader);
+        string? type = jsonObject["type"]?.Value<string>();
 
         StreamingEvent? streamingEvent = type switch
         {

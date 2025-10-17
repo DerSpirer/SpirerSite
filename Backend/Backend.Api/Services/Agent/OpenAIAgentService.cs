@@ -4,6 +4,7 @@ using Backend.Api.Enums;
 using Backend.Api.Models.Agent;
 using Backend.Api.Models.OpenAI.Requests;
 using Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
 namespace Backend.Api.Services.Agent;

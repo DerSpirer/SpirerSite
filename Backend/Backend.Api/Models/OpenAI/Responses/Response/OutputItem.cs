@@ -1,3 +1,4 @@
+using Backend.Api.Models.Agent;
 using Newtonsoft.Json;
 
 namespace Backend.Api.Models.OpenAI.Responses.Response;
@@ -8,7 +9,7 @@ namespace Backend.Api.Models.OpenAI.Responses.Response;
 public abstract class OutputItem
 {
     public required string id { get; set; }
-    public string? status { get; set; }
+    public Status? status { get; set; }
     public required string type { get; set; }
 }
 

@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Backend.Api.Models.OpenAI.Converters;
 
 namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
 
@@ -26,7 +27,7 @@ public class ResponseContentPartEvent : StreamingEvent
     /// <summary>
     /// The content part (can be OutputText, Refusal, or ReasoningTextContent)
     /// </summary>
-    [JsonConverter(typeof(Response.ContentItemConverter))]
+    [JsonConverter(typeof(ContentItemConverter))]
     public required Response.ContentItem part { get; set; }
 }
 

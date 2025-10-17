@@ -1,4 +1,5 @@
 using Backend.Api.Models.OpenAI.Responses.Response;
+using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
 namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
