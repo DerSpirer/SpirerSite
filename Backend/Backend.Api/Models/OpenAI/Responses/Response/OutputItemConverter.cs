@@ -1,0 +1,37 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace Backend.Api.Models.OpenAI.Responses.Response;
+
+/// <summary>
+/// JSON converter for polymorphic OutputItem deserialization
+/// </summary>
+public class OutputItemConverter : JsonConverter<OutputItem>
+{
+    public override OutputItem? ReadJson(JsonReader reader, Type objectType, OutputItem? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        var jsonObject = JObject.Load(reader);
+        var type = jsonObject["type"]?.Value<string>();
+
+        OutputItem? item = type switch
+        {
+            "message" => jsonObject.ToObject<OutputMessage>(),
+            "function_call" => jsonObject.ToObject<FunctionToolCall>(),
+            "reasoning" => jsonObject.ToObject<ReasoningOutput>(),
+            _ => null
+        };
+
+        if (item != null)
+        {
+            serializer.Populate(jsonObject.CreateReader(), item);
+        }
+
+        return item;
+    }
+
+    public override void WriteJson(JsonWriter writer, OutputItem? value, JsonSerializer serializer)
+    {
+        serializer.Serialize(writer, value);
+    }
+}
+
