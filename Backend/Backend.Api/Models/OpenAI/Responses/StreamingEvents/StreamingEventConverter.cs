@@ -42,11 +42,6 @@ public class StreamingEventConverter : JsonConverter<StreamingEvent>
             _ => null
         };
 
-        if (streamingEvent != null)
-        {
-            serializer.Populate(jsonObject.CreateReader(), streamingEvent);
-        }
-
         return streamingEvent;
     }
 

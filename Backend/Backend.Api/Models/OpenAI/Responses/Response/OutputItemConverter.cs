@@ -21,11 +21,6 @@ public class OutputItemConverter : JsonConverter<OutputItem>
             _ => null
         };
 
-        if (item != null)
-        {
-            serializer.Populate(jsonObject.CreateReader(), item);
-        }
-
         return item;
     }
 

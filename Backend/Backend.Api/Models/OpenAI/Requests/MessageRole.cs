@@ -1,10 +1,13 @@
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Backend.Api.Models.OpenAI.Requests;
 
 /// <summary>
 /// The role of a message input indicating instruction following hierarchy.
 /// </summary>
+[JsonConverter(typeof(StringEnumConverter))]
 public enum MessageRole
 {
     /// <summary>

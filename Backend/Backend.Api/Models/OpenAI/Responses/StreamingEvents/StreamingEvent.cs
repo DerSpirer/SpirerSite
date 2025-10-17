@@ -5,7 +5,6 @@ namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
 /// <summary>
 /// Base class for all streaming events from OpenAI API
 /// </summary>
-[JsonConverter(typeof(StreamingEventConverter))]
 public abstract class StreamingEvent
 {
     /// <summary>

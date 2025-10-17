@@ -14,7 +14,6 @@ public class OutputMessage : OutputItem
 /// <summary>
 /// Base class for content items in an output message
 /// </summary>
-[JsonConverter(typeof(ContentItemConverter))]
 public abstract class ContentItem
 {
     public required string type { get; set; }

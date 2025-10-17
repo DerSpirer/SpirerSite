@@ -1,3 +1,6 @@
+using Backend.Api.Models.OpenAI.Responses.Response;
+using Newtonsoft.Json;
+
 namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
 
 /// <summary>
@@ -9,7 +12,8 @@ public class ResponseOutputItemEvent : StreamingEvent
     /// <summary>
     /// The output item associated with this event
     /// </summary>
-    public required Response.OutputItem item { get; set; }
+    [JsonConverter(typeof(OutputItemConverter))]
+    public required OutputItem item { get; set; }
     
     /// <summary>
     /// The index of the output item

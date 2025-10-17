@@ -3,6 +3,7 @@ using System.Text;
 using Backend.Api.Enums;
 using Backend.Api.Models.Agent;
 using Backend.Api.Models.OpenAI.Requests;
+using Backend.Api.Models.OpenAI.Responses.StreamingEvents;
 using Newtonsoft.Json;
 
 namespace Backend.Api.Services.Agent;
@@ -16,17 +17,18 @@ public class OpenAIAgentService : IAgentService
 
     private readonly ILogger<OpenAIAgentService> _logger;
     private readonly HttpClient _httpClient;
-    private static readonly JsonSerializer _serializer = JsonSerializer.Create(_serializerSettings);
     private static readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
     {
         Formatting = Formatting.None,
         NullValueHandling = NullValueHandling.Ignore,
+        Converters = new List<JsonConverter> { new StreamingEventConverter() }
         // The contract resolver is not needed because the properties are already snake_case
         // ContractResolver = new DefaultContractResolver()
         // {
         //     NamingStrategy = new SnakeCaseNamingStrategy()
         // }
     };
+    private static readonly JsonSerializer _serializer = JsonSerializer.Create(_serializerSettings);
     private readonly string _apiKey;
 
     public OpenAIAgentService(IConfiguration configuration, ILogger<OpenAIAgentService> logger, HttpClient httpClient)
@@ -50,7 +52,10 @@ public class OpenAIAgentService : IAgentService
         // Read the stream using OpenAIStreamReader and yield response chunks as they arrive
         Stream stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken);
 
-        yield break;
+        await foreach (var chatResponse in ProcessStreamAsync(stream, cancellationToken))
+        {
+            yield return chatResponse;
+        }
     }
     private async Task<HttpResponseMessage> SendCreateResponseRequest(string input, string? previousResponseId = null, CancellationToken cancellationToken = default)
     {
@@ -85,5 +90,104 @@ public class OpenAIAgentService : IAgentService
         using var jsonWriter = new JsonTextWriter(stringWriter);
         _serializer.Serialize(jsonWriter, obj);
         return stringWriter.ToString();
+    }
+
+    private async IAsyncEnumerable<ChatResponse> ProcessStreamAsync(
+        Stream stream,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        
+        while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+        {
+            string? line = await reader.ReadLineAsync(cancellationToken);
+            _logger.LogDebug(line);
+            
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            // SSE format: lines start with "data: "
+            if (!line.StartsWith("data: "))
+            {
+                continue;
+            }
+
+            string data = line.Substring(6); // Remove "data: " prefix
+
+            // Check for stream end
+            if (data == "[DONE]")
+            {
+                _logger.LogInformation("Stream completed with [DONE] signal");
+                yield break;
+            }
+
+            // Deserialize the event
+            StreamingEvent? streamingEvent;
+            try
+            {
+                streamingEvent = JsonConvert.DeserializeObject<StreamingEvent>(data, _serializerSettings);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Failed to deserialize streaming event: {Data}", data);
+                continue;
+            }
+
+            if (streamingEvent == null)
+            {
+                _logger.LogWarning("Received null streaming event for data: {Data}", data);
+                continue;
+            }
+
+            // Map streaming event to ChatResponse
+            ChatResponse? chatResponse = MapStreamingEventToChatResponse(streamingEvent);
+            
+            if (chatResponse != null)
+            {
+                yield return chatResponse;
+            }
+        }
+    }
+
+    private ChatResponse? MapStreamingEventToChatResponse(StreamingEvent streamingEvent)
+    {
+        return streamingEvent switch
+        {
+            ResponseEvent responseEvent => new ChatResponse
+            {
+                Id = responseEvent.response.id,
+                Status = Enum.TryParse<Status>(responseEvent.response.status, out var status) ? status : null
+            },
+            
+            ResponseOutputTextEvent outputTextEvent => new ChatResponse
+            {
+                Content = outputTextEvent.delta ?? outputTextEvent.text
+            },
+            
+            ResponseRefusalEvent refusalEvent => new ChatResponse
+            {
+                Refusal = refusalEvent.delta ?? refusalEvent.refusal
+            },
+            
+            ResponseReasoningTextEvent reasoningEvent => new ChatResponse
+            {
+                Reasoning = reasoningEvent.delta ?? reasoningEvent.text
+            },
+            
+            ResponseFunctionCallArgumentsEvent functionCallEvent => new ChatResponse
+            {
+                ToolCallId = functionCallEvent.item_id,
+                ToolName = functionCallEvent.name,
+                ToolArguments = functionCallEvent.delta ?? functionCallEvent.arguments
+            },
+            
+            // For output item and content part events, we don't need to yield anything yet
+            ResponseOutputItemEvent => null,
+            ResponseContentPartEvent => null,
+            
+            _ => null
+        };
     }
 }
