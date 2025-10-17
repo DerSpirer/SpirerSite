@@ -1,10 +1,10 @@
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
-/// An event emitted for refusal text changes during response streaming.
-/// Types include: response.refusal.delta, response.refusal.done
+/// An event emitted for output text changes during response streaming.
+/// Types include: response.output_text.delta, response.output_text.done
 /// </summary>
-public class ResponseRefusalEvent : StreamingEvent
+public class ResponseOutputTextEvent : StreamingEvent
 {
     /// <summary>
     /// The index of the content part
@@ -12,7 +12,7 @@ public class ResponseRefusalEvent : StreamingEvent
     public required int content_index { get; set; }
     
     /// <summary>
-    /// The refusal text delta that is added (present in response.refusal.delta)
+    /// The text delta that was added (present in response.output_text.delta)
     /// </summary>
     public string? delta { get; set; }
     
@@ -27,8 +27,8 @@ public class ResponseRefusalEvent : StreamingEvent
     public required int output_index { get; set; }
     
     /// <summary>
-    /// The finalized refusal text (present in response.refusal.done)
+    /// The finalized text content (present in response.output_text.done)
     /// </summary>
-    public string? refusal { get; set; }
+    public string? text { get; set; }
 }
 

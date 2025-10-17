@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Backend.Api.Models.OpenAI.Responses.Response;
+using Backend.Api.Models.OpenAI.Objects;
 
 namespace Backend.Api.Models.OpenAI.Converters;
 

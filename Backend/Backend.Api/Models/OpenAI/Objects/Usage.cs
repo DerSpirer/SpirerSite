@@ -1,4 +1,4 @@
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Objects;
 
 /// <summary>
 /// Token usage details including input tokens, output tokens, and total tokens used

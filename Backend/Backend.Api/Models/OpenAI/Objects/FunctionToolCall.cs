@@ -1,4 +1,4 @@
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Objects;
 
 /// <summary>
 /// A tool call to run a function

@@ -1,4 +1,4 @@
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
 /// An event emitted for reasoning text changes during response streaming.

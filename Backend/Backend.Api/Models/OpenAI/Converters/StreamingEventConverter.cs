@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+using Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 namespace Backend.Api.Models.OpenAI.Converters;
 

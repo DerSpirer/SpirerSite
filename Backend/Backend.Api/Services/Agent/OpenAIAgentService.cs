@@ -3,7 +3,7 @@ using System.Text;
 using Backend.Api.Enums;
 using Backend.Api.Models.Agent;
 using Backend.Api.Models.OpenAI.Requests;
-using Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+using Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
@@ -159,7 +159,7 @@ public class OpenAIAgentService : IAgentService
             ResponseEvent responseEvent => new ChatResponse
             {
                 Id = responseEvent.response.id,
-                Status = Enum.TryParse<Status>(responseEvent.response.status, out var status) ? status : null
+                Status = responseEvent.response.status
             },
             
             ResponseOutputTextEvent outputTextEvent => new ChatResponse

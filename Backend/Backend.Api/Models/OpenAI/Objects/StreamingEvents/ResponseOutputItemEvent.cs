@@ -1,8 +1,7 @@
-using Backend.Api.Models.OpenAI.Responses.Response;
 using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
 /// An event emitted for output item changes during response streaming.

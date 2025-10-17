@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Backend.Api.Models.OpenAI.Converters;
 
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
 /// An event emitted for content part changes during response streaming.
@@ -28,6 +28,6 @@ public class ResponseContentPartEvent : StreamingEvent
     /// The content part (can be OutputText, Refusal, or ReasoningTextContent)
     /// </summary>
     [JsonConverter(typeof(ContentItemConverter))]
-    public required Response.ContentItem part { get; set; }
+    public required ContentItem part { get; set; }
 }
 

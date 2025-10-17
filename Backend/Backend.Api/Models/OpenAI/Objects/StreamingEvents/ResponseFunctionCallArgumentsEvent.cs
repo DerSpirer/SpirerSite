@@ -1,4 +1,4 @@
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
 /// An event emitted for function call arguments changes during response streaming.

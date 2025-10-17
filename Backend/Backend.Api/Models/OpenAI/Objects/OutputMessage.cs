@@ -3,7 +3,7 @@ using Backend.Api.Models.OpenAI.Requests;
 using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Objects;
 
 /// <summary>
 /// An output message from the model

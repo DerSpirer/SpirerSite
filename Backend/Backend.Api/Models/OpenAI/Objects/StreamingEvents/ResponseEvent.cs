@@ -1,4 +1,4 @@
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
 /// An event emitted during response streaming.
@@ -9,6 +9,6 @@ public class ResponseEvent : StreamingEvent
     /// <summary>
     /// The response object associated with this event
     /// </summary>
-    public required Response.Response response { get; set; }
+    public required Response response { get; set; }
 }
 

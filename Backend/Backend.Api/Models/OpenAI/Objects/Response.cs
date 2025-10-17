@@ -2,7 +2,7 @@ using Backend.Api.Models.Agent;
 using Backend.Api.Models.OpenAI.Converters;
 using Newtonsoft.Json;
 
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Objects;
 
 /// <summary>
 /// Response object from OpenAI API

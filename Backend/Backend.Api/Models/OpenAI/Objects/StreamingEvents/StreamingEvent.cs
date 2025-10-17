@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Backend.Api.Models.OpenAI.Responses.StreamingEvents;
+namespace Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 
 /// <summary>
 /// Base class for all streaming events from OpenAI API

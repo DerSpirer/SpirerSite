@@ -1,4 +1,4 @@
-namespace Backend.Api.Models.OpenAI.Responses.Response;
+namespace Backend.Api.Models.OpenAI.Objects;
 
 /// <summary>
 /// A description of the chain of thought used by a reasoning model while generating a response
