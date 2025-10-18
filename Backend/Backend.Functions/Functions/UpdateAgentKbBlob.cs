@@ -49,7 +49,7 @@ public class UpdateAgentKbBlob
                 content = content
             };
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, )
+            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, backendApiUri)
             {
                 Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"),
             };
