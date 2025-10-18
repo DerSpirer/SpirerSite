@@ -16,9 +16,9 @@ public class ContentItemConverter : JsonConverter<ContentItem>
 
         ContentItem? item = type switch
         {
-            "output_text" => jsonObject.ToObject<OutputText>(serializer),
-            "refusal" => jsonObject.ToObject<Refusal>(serializer),
-            "reasoning_text" => jsonObject.ToObject<ReasoningTextContent>(serializer),
+            "output_text" => jsonObject.ToObject<OutputText>(),
+            "refusal" => jsonObject.ToObject<Refusal>(),
+            "reasoning_text" => jsonObject.ToObject<ReasoningTextContent>(),
             _ => null
         };
 

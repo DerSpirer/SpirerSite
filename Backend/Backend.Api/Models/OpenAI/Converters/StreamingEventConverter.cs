@@ -16,29 +16,29 @@ public class StreamingEventConverter : JsonConverter<StreamingEvent>
 
         StreamingEvent? streamingEvent = type switch
         {
-            "response.created" => jsonObject.ToObject<ResponseEvent>(serializer),
-            "response.in_progress" => jsonObject.ToObject<ResponseEvent>(serializer),
-            "response.completed" => jsonObject.ToObject<ResponseEvent>(serializer),
-            "response.failed" => jsonObject.ToObject<ResponseEvent>(serializer),
-            "response.incomplete" => jsonObject.ToObject<ResponseEvent>(serializer),
+            "response.created" => jsonObject.ToObject<ResponseEvent>(),
+            "response.in_progress" => jsonObject.ToObject<ResponseEvent>(),
+            "response.completed" => jsonObject.ToObject<ResponseEvent>(),
+            "response.failed" => jsonObject.ToObject<ResponseEvent>(),
+            "response.incomplete" => jsonObject.ToObject<ResponseEvent>(),
             
-            "response.output_item.added" => jsonObject.ToObject<ResponseOutputItemEvent>(serializer),
-            "response.output_item.done" => jsonObject.ToObject<ResponseOutputItemEvent>(serializer),
+            "response.output_item.added" => jsonObject.ToObject<ResponseOutputItemEvent>(),
+            "response.output_item.done" => jsonObject.ToObject<ResponseOutputItemEvent>(),
             
-            "response.content_part.added" => jsonObject.ToObject<ResponseContentPartEvent>(serializer),
-            "response.content_part.done" => jsonObject.ToObject<ResponseContentPartEvent>(serializer),
+            "response.content_part.added" => jsonObject.ToObject<ResponseContentPartEvent>(),
+            "response.content_part.done" => jsonObject.ToObject<ResponseContentPartEvent>(),
             
-            "response.output_text.delta" => jsonObject.ToObject<ResponseOutputTextEvent>(serializer),
-            "response.output_text.done" => jsonObject.ToObject<ResponseOutputTextEvent>(serializer),
+            "response.output_text.delta" => jsonObject.ToObject<ResponseOutputTextEvent>(),
+            "response.output_text.done" => jsonObject.ToObject<ResponseOutputTextEvent>(),
             
-            "response.refusal.delta" => jsonObject.ToObject<ResponseRefusalEvent>(serializer),
-            "response.refusal.done" => jsonObject.ToObject<ResponseRefusalEvent>(serializer),
+            "response.refusal.delta" => jsonObject.ToObject<ResponseRefusalEvent>(),
+            "response.refusal.done" => jsonObject.ToObject<ResponseRefusalEvent>(),
             
-            "response.function_call_arguments.delta" => jsonObject.ToObject<ResponseFunctionCallArgumentsEvent>(serializer),
-            "response.function_call_arguments.done" => jsonObject.ToObject<ResponseFunctionCallArgumentsEvent>(serializer),
+            "response.function_call_arguments.delta" => jsonObject.ToObject<ResponseFunctionCallArgumentsEvent>(),
+            "response.function_call_arguments.done" => jsonObject.ToObject<ResponseFunctionCallArgumentsEvent>(),
             
-            "response.reasoning_text.delta" => jsonObject.ToObject<ResponseReasoningTextEvent>(serializer),
-            "response.reasoning_text.done" => jsonObject.ToObject<ResponseReasoningTextEvent>(serializer),
+            "response.reasoning_text.delta" => jsonObject.ToObject<ResponseReasoningTextEvent>(),
+            "response.reasoning_text.done" => jsonObject.ToObject<ResponseReasoningTextEvent>(),
             
             _ => null
         };
