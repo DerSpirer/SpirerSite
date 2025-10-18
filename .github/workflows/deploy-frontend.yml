@@ -36,16 +36,18 @@ jobs:
           node-version: lts/*
           cache: 'npm'
       - name: Install dependencies
+        working-directory: ./Frontend
         run: npm ci
       - name: Build
+        working-directory: ./Frontend
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          # Upload dist folder
-          path: './dist'
+          # Upload dist folder from Frontend directory
+          path: './Frontend/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
