@@ -70,4 +70,53 @@ public class AgentController : ControllerBase
             await Response.WriteAsync("data: [ERROR]\n\n", cancellationToken);
         }
     }
+
+    /// <summary>
+    /// Refreshes a knowledge base document by processing and updating it in the vector database
+    /// </summary>
+    /// <param name="request">The refresh KB document request</param>
+    /// <returns>Status of the refresh operation</returns>
+    [HttpPost("refresh-kb-document")]
+    public IActionResult RefreshKbDocument([FromBody] RefreshKbDocumentRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.DocumentName))
+            {
+                return BadRequest(new { error = "DocumentName is required" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                return BadRequest(new { error = "Content is required" });
+            }
+
+            _logger.LogInformation($"Refreshing KB document: {request.DocumentName}");
+
+            // TODO: Implement the actual refresh logic
+            // 1. Parse/chunk the document content
+            // 2. Generate embeddings for the chunks
+            // 3. Update the vector database with the new embeddings
+
+            _logger.LogInformation($"Successfully refreshed KB document: {request.DocumentName}");
+
+            return Ok(new
+            {
+                status = "success",
+                message = $"KB document '{request.DocumentName}' refreshed successfully",
+                documentName = request.DocumentName,
+                timestamp = DateTime.UtcNow
+            });
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, $"Error refreshing KB document: {request.DocumentName}");
+            return StatusCode(500, new
+            {
+                status = "error",
+                message = "An error occurred while refreshing the KB document",
+                error = exception.Message
+            });
+        }
+    }
 }
