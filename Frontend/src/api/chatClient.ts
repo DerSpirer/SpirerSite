@@ -1,10 +1,6 @@
 import axios, { type AxiosInstance } from 'axios'
 import { API } from '../constants'
-import type { Message } from '../types'
-
-export interface GenerateResponseRequest {
-  messages: Message[]
-}
+import type { ChatRequest, Message } from '../types'
 
 export class ChatApiClient {
   private axiosInstance: AxiosInstance
@@ -20,23 +16,26 @@ export class ChatApiClient {
 
   /**
    * Generates a response from the chat API using Server-Sent Events
-   * @param messages - Array of messages in the conversation
+   * @param input - The user's input message
+   * @param previousResponseId - Optional ID from the previous response for conversation context
    * @param onChunk - Callback function called for each chunk received
    * @returns Promise that resolves when streaming is complete
    */
   async generateResponseStream(
-    messages: Message[],
+    input: string,
+    previousResponseId: string | undefined,
     onChunk: (chunk: Message) => void
   ): Promise<void> {
-    const request: GenerateResponseRequest = {
-      messages,
+    const request: ChatRequest = {
+      Input: input,
+      PreviousResponseId: previousResponseId,
     }
     let lastProcessedIndex = 0
     let buffer = '' // Buffer for incomplete lines
 
     try {
       await this.axiosInstance.post(
-        API.ENDPOINTS.GENERATE_RESPONSE,
+        API.ENDPOINTS.CHAT_STREAM,
         request,
         {
           responseType: 'text',
@@ -59,12 +58,15 @@ export class ChatApiClient {
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6) // Remove 'data: ' prefix
+                if (data === '[DONE]' || data === '[ERROR]') {
+                  continue
+                }
                 if (data) {
                   try {
-                    const chunk = JSON.parse(data) as Message
+                    const message = JSON.parse(data) as Message
                     // Only send non-empty chunks
-                    if (Object.keys(chunk).length > 0) {
-                      onChunk(chunk)
+                    if (Object.keys(message).length > 0) {
+                      onChunk(message)
                     }
                   } catch (e) {
                     console.error('Failed to parse SSE data as JSON:', data, e)
@@ -80,12 +82,12 @@ export class ChatApiClient {
       if (buffer.trim()) {
         if (buffer.startsWith('data: ')) {
           const data = buffer.slice(6)
-          if (data) {
+          if (data && data !== '[DONE]' && data !== '[ERROR]') {
             try {
-              const chunk = JSON.parse(data) as Message
+              const message = JSON.parse(data) as Message
               // Only send non-empty chunks
-              if (Object.keys(chunk).length > 0) {
-                onChunk(chunk)
+              if (Object.keys(message).length > 0) {
+                onChunk(message)
               }
             } catch (e) {
               console.error('Failed to parse SSE data as JSON:', data, e)
@@ -101,16 +103,19 @@ export class ChatApiClient {
 
   /**
    * Leaves a message for Tom (contact form submission)
-   * @param params - Message parameters
+   * Note: This endpoint is not yet implemented in the backend
+   * @param _params - Message parameters (currently unused)
    * @returns Promise that resolves when message is sent
    */
-  async leaveMessage(params: {
+  async leaveMessage(_params: {
     fromName: string
     fromEmail: string
     subject: string
     body: string
   }): Promise<void> {
-    await this.axiosInstance.post(API.ENDPOINTS.LEAVE_MESSAGE, params)
+    // TODO: Implement backend endpoint for this functionality
+    console.warn('leaveMessage endpoint not yet implemented in backend')
+    throw new Error('Leave message functionality not yet implemented')
   }
 }
 

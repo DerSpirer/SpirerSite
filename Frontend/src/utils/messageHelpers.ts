@@ -1,28 +1,28 @@
-import type { Message, ToolResponse, LeaveMessageParams, ToolCall } from '../types'
+import type { Message, ToolResponse, LeaveMessageParams } from '../types'
 import { Role } from '../types'
 
 export const createErrorMessage = (): Message => ({
-  role: Role.Assistant,
-  content: 'Sorry, I encountered an error. Please try again.',
+  Role: Role.Assistant,
+  Content: 'Sorry, I encountered an error. Please try again.',
 })
 
 export const createUserMessage = (content: string): Message => ({
-  role: Role.User,
-  content,
+  Role: Role.User,
+  Content: content,
 })
 
 export const createAssistantMessage = (content: string): Message => ({
-  role: Role.Assistant,
-  content,
+  Role: Role.Assistant,
+  Content: content,
 })
 
 export const createToolResponseMessage = (
   toolCallId: string,
   response: ToolResponse
 ): Message => ({
-  role: Role.Tool,
-  content: JSON.stringify(response),
-  toolCallId,
+  Role: Role.Tool,
+  Content: JSON.stringify(response),
+  ToolCallId: toolCallId,
 })
 
 /**
@@ -65,13 +65,6 @@ export function parseLeaveMessageParams(args: string | undefined): LeaveMessageP
 }
 
 /**
- * Finds a tool call by name in a message.
- */
-export function findToolCall(toolCalls: ToolCall[] | undefined, toolName: string): ToolCall | undefined {
-  return toolCalls?.find((tc) => tc.function?.name === toolName)
-}
-
-/**
  * Finds a tool response message for a given tool call ID.
  */
 export function findToolResponseForCall(
@@ -81,8 +74,8 @@ export function findToolResponseForCall(
   if (!toolCallId) return null
   
   const responseMsg = messages.find(
-    (msg) => msg.role === Role.Tool && msg.toolCallId === toolCallId
+    (msg) => msg.Role === Role.Tool && msg.ToolCallId === toolCallId
   )
   
-  return responseMsg ? parseToolResponse(responseMsg.content) : null
+  return responseMsg ? parseToolResponse(responseMsg.Content) : null
 }

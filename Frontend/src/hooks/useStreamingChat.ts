@@ -14,21 +14,25 @@ import { createMessageAccumulator } from '../utils/messageAccumulator'
  * - Processing tool calls and tool responses
  * - Automatic continuation after tool responses
  * - Error handling for failed requests
+ * - Tracking conversation context via previousResponseId
  */
 export function useStreamingChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasChatStarted, setHasChatStarted] = useState(false)
+  const [previousResponseId, setPreviousResponseId] = useState<string | undefined>(undefined)
   
   // Prevents duplicate API calls when the same tool response triggers multiple renders
   const lastProcessedMessageCount = useRef(0)
 
   /**
-   * Generates an assistant response from the current conversation history.
+   * Generates an assistant response from the backend.
    * Handles streaming responses, tool calls, and error states.
    * Always updates the last message in the array (no IDs needed).
+   * 
+   * @param userInput - The user's input text to send to the backend
    */
-  const generateResponse = useCallback(async (messagesBeforeResponse: Message[]) => {
+  const generateResponse = useCallback(async (userInput: string) => {
     if (isLoading) return
     
     setIsLoading(true)
@@ -39,18 +43,19 @@ export function useStreamingChat() {
     try {
       const accumulator = createMessageAccumulator()
 
-      await chatApi.generateResponseStream(messagesBeforeResponse, (chunk) => {
+      await chatApi.generateResponseStream(userInput, previousResponseId, (chunk) => {
         accumulator.accumulate(chunk)
         const state = accumulator.getState()
+        
+        // Update previousResponseId if we receive an Id in the chunk
+        if (chunk.Id) {
+          setPreviousResponseId(chunk.Id)
+        }
         
         setMessages((prev) => {
           const updated = [...prev]
           const lastIndex = updated.length - 1
-          updated[lastIndex] = {
-            ...updated[lastIndex],
-            content: state.content,
-            toolCalls: state.toolCalls?.length ? state.toolCalls : undefined
-          }
+          updated[lastIndex] = state
           return updated
         })
       })
@@ -72,7 +77,7 @@ export function useStreamingChat() {
     } finally {
       setIsLoading(false)
     }
-  }, [isLoading])
+  }, [isLoading, previousResponseId])
 
   /**
    * Sends a user message and triggers an assistant response.
@@ -88,11 +93,10 @@ export function useStreamingChat() {
     }
 
     const newUserMessage = createUserMessage(userMessageText)
-    const messagesWithUserMessage = [...messages, newUserMessage]
-    setMessages(messagesWithUserMessage)
+    setMessages((prev) => [...prev, newUserMessage])
 
-    await generateResponse(messagesWithUserMessage)
-  }, [isLoading, hasChatStarted, generateResponse, messages])
+    await generateResponse(userMessageText)
+  }, [isLoading, hasChatStarted, generateResponse])
 
   /**
    * Handles accepting the leave_message tool call (contact form submission).
@@ -128,19 +132,24 @@ export function useStreamingChat() {
    * Automatically trigger a follow-up assistant response when a tool response is added.
    * This creates a continuous conversation flow where the assistant can acknowledge
    * tool results and continue the interaction.
+   * 
+   * TODO: This needs to be reworked with the new backend API that uses previousResponseId
+   * instead of sending the full message history.
    */
   useEffect(() => {
     const lastMessage = messages[messages.length - 1]
     
     if (
-      lastMessage?.role === 'tool' && 
+      lastMessage?.Role === 'tool' && 
       !isLoading && 
       messages.length > lastProcessedMessageCount.current
     ) {
       lastProcessedMessageCount.current = messages.length
-      generateResponse(messages)
+      // TODO: Need to send the tool response to the backend properly
+      // For now, this functionality is disabled
+      console.warn('Tool response follow-up not yet implemented with new API')
     }
-  }, [messages, isLoading, generateResponse])
+  }, [messages, isLoading])
 
   return {
     messages,

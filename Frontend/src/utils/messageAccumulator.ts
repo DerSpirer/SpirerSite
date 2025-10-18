@@ -1,75 +1,65 @@
-import type { Message, ToolCall } from '../types'
+import type { Message } from '../types'
 
 /**
- * Creates a message accumulator for streaming responses.
- * Returns an object with the accumulated message and an accumulate function.
+ * Creates a message accumulator for streaming responses from the backend.
+ * Accumulates Content, Refusal, Reasoning, and tool call information (ToolName, ToolArguments).
  */
 export function createMessageAccumulator() {
   const message: Message = {
-    role: 'assistant',
-    content: '',
-    toolCalls: []
+    Role: 'assistant',
+    Content: '',
+    Refusal: '',
+    Reasoning: '',
+    ToolName: undefined,
+    ToolArguments: undefined,
+    ToolCallId: undefined,
   }
 
   /**
    * Accumulates a delta chunk into the message
    */
   function accumulate(delta: Message): void {
-    // Set role if provided (usually comes once at the start)
-    if (delta.role) {
-      message.role = delta.role
+    // Set Role if provided (usually comes once at the start)
+    if (delta.Role) {
+      message.Role = delta.Role
     }
 
-    // Append content (comes incrementally)
-    if (delta.content) {
-      message.content += delta.content
+    // Set Id if provided
+    if (delta.Id) {
+      message.Id = delta.Id
     }
 
-    // Append refusal if present
-    if (delta.refusal) {
-      message.refusal = (message.refusal || '') + delta.refusal
+    // Set Status if provided
+    if (delta.Status) {
+      message.Status = delta.Status
     }
 
-    // Accumulate tool calls - add to the last (current) tool call
-    if (delta.toolCalls && delta.toolCalls.length > 0) {
-      const toolCallDelta = delta.toolCalls[0] // Always use first delta (streaming sends one at a time)
-      
-      // Get or create the last tool call
-      if (!message.toolCalls || message.toolCalls.length === 0) {
-        message.toolCalls = [{
-          id: '',
-          type: 'function',
-          function: {
-            name: '',
-            arguments: ''
-          }
-        }]
-      }
-      
-      const toolCall = message.toolCalls[message.toolCalls.length - 1]
-      
-      // Set id (usually comes once in first chunk)
-      if (toolCallDelta.id !== undefined) {
-        toolCall.id = toolCallDelta.id
-      }
-      
-      // Set type (usually comes once in first chunk)
-      if (toolCallDelta.type !== undefined) {
-        toolCall.type = toolCallDelta.type
-      }
-      
-      // Accumulate function fields
-      if (toolCallDelta.function) {
-        // Set function name (usually comes once in first chunk)
-        if (toolCallDelta.function.name !== undefined) {
-          toolCall.function.name = toolCallDelta.function.name
-        }
-        
-        // Append function arguments (comes incrementally)
-        if (toolCallDelta.function.arguments !== undefined) {
-          toolCall.function.arguments = (toolCall.function.arguments || '') + toolCallDelta.function.arguments
-        }
-      }
+    // Append Content (comes incrementally)
+    if (delta.Content) {
+      message.Content = (message.Content || '') + delta.Content
+    }
+
+    // Append Refusal if present
+    if (delta.Refusal) {
+      message.Refusal = (message.Refusal || '') + delta.Refusal
+    }
+
+    // Append Reasoning if present
+    if (delta.Reasoning) {
+      message.Reasoning = (message.Reasoning || '') + delta.Reasoning
+    }
+
+    // Handle tool call information
+    if (delta.ToolCallId) {
+      message.ToolCallId = delta.ToolCallId
+    }
+
+    if (delta.ToolName) {
+      message.ToolName = delta.ToolName
+    }
+
+    if (delta.ToolArguments) {
+      message.ToolArguments = (message.ToolArguments || '') + delta.ToolArguments
     }
   }
 
@@ -77,41 +67,18 @@ export function createMessageAccumulator() {
    * Checks if the accumulated message has any content
    */
   function hasContent(): boolean {
-    return Boolean(message.content && message.content.length > 0) || Boolean(message.toolCalls && message.toolCalls.length > 0)
-  }
-
-  /**
-   * Gets the complete tool calls (with valid JSON arguments)
-   */
-  function getCompleteToolCalls(): ToolCall[] {
-    if (!message.toolCalls || message.toolCalls.length === 0) {
-      return []
-    }
-
-    return message.toolCalls.filter(tc => {
-      if (!tc.id || !tc.function.name) return false
-      
-      // Check if arguments is complete JSON
-      const args = tc.function.arguments?.trim()
-      if (!args) return false
-      
-      try {
-        JSON.parse(args)
-        return true
-      } catch {
-        return false
-      }
-    })
+    return Boolean(
+      (message.Content && message.Content.length > 0) ||
+      (message.Reasoning && message.Reasoning.length > 0) ||
+      (message.ToolName && message.ToolArguments)
+    )
   }
 
   /**
    * Gets the current accumulated message state
    */
-  function getState() {
-    return {
-      ...message,
-      toolCalls: getCompleteToolCalls()
-    }
+  function getState(): Message {
+    return { ...message }
   }
 
   return {

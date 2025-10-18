@@ -9,7 +9,6 @@ import { useMemo, memo, useState } from 'react'
 import { markdownToReact } from '../../markdown/markdownRenderer'
 import {
   parseLeaveMessageParams,
-  findToolCall,
   findToolResponseForCall,
   parseToolResponse,
 } from '../../utils/messageHelpers'
@@ -278,13 +277,13 @@ function MessageBubble({
 }: MessageBubbleProps) {
   // Memoize markdown styles
   const markdownStyles = useMemo(
-    () => getMessageBubbleStyles(getRoleType(message.role)),
-    [message.role]
+    () => getMessageBubbleStyles(getRoleType(message.Role)),
+    [message.Role]
   )
 
   // Handle tool response messages
-  if (message.role === Role.Tool) {
-    const toolResponse = parseToolResponse(message.content)
+  if (message.Role === Role.Tool) {
+    const toolResponse = parseToolResponse(message.Content)
     if (!toolResponse) return null
     return <ToolResponseBubble toolResponse={toolResponse} />
   }
@@ -292,45 +291,39 @@ function MessageBubble({
   // Show typing animation for empty assistant messages being streamed
   const showTypingAnimation = useMemo(() => {
     return (
-      message.role === Role.Assistant &&
-      !message.content &&
+      message.Role === Role.Assistant &&
+      !message.Content &&
       isStreaming &&
       messageIndex === allMessages.length - 1
     )
-  }, [message.role, message.content, isStreaming, messageIndex, allMessages.length])
+  }, [message.Role, message.Content, isStreaming, messageIndex, allMessages.length])
 
-  // Find leave_message tool call if present
-  const leaveMessageToolCall = useMemo(
-    () => findToolCall(message.toolCalls, ToolName.LeaveMessage),
-    [message.toolCalls]
+  // Parse tool call parameters from ToolArguments if present
+  const messageParams = useMemo(
+    () => message.ToolName === ToolName.LeaveMessage ? parseLeaveMessageParams(message.ToolArguments) : null,
+    [message.ToolName, message.ToolArguments]
   )
 
   // Find tool response for this tool call
   const toolResponse = useMemo(
-    () => findToolResponseForCall(allMessages, leaveMessageToolCall?.id),
-    [leaveMessageToolCall?.id, allMessages]
-  )
-
-  // Parse tool call parameters
-  const messageParams = useMemo(
-    () => parseLeaveMessageParams(leaveMessageToolCall?.function?.arguments),
-    [leaveMessageToolCall?.function?.arguments]
+    () => findToolResponseForCall(allMessages, message.ToolCallId),
+    [message.ToolCallId, allMessages]
   )
 
   return (
     <Box
       sx={{
         display: 'flex',
-        justifyContent: message.role === Role.User ? 'flex-end' : 'flex-start',
+        justifyContent: message.Role === Role.User ? 'flex-end' : 'flex-start',
         width: '100%',
       }}
     >
       {showTypingAnimation ? (
         <TypingIndicator />
-      ) : messageParams && leaveMessageToolCall?.id ? (
+      ) : messageParams && message.ToolCallId ? (
         <Box sx={{ width: '100%', maxWidth: '500px' }}>
           <MessagePreview
-            toolCallId={leaveMessageToolCall.id}
+            toolCallId={message.ToolCallId}
             params={messageParams}
             onLeave={toolResponse ? undefined : onLeaveMessage}
             onReject={toolResponse ? undefined : onRejectMessage}
@@ -340,7 +333,12 @@ function MessageBubble({
         </Box>
       ) : (
         <Box sx={markdownStyles}>
-          {markdownToReact(message.content || '')}
+          {markdownToReact(message.Content || '')}
+          {message.Reasoning && (
+            <Box sx={{ mt: 2, opacity: 0.7, fontStyle: 'italic' }}>
+              {markdownToReact(message.Reasoning)}
+            </Box>
+          )}
         </Box>
       )}
     </Box>
