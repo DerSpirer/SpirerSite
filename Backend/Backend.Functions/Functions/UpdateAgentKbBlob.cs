@@ -37,6 +37,10 @@ public class UpdateAgentKbBlob
 
             // Get backend API URL from configuration
             var backendApiUrl = _configuration["BackendApiUrl"] ?? throw new InvalidOperationException("BackendApiUrl is not configured");
+            if (string.IsNullOrWhiteSpace(backendApiUrl) || !Uri.TryCreate($"{backendApiUrl}/api/agent/refresh-kb-document", UriKind.Absolute, out Uri? backendApiUri))
+            {
+                throw new InvalidOperationException($"Invalid backend API URL: '{backendApiUrl}/api/agent/refresh-kb-document'");
+            }
 
             // Prepare the request payload
             var payload = new
@@ -45,16 +49,14 @@ public class UpdateAgentKbBlob
                 content = content
             };
 
-            var jsonContent = new StringContent(
-                JsonSerializer.Serialize(payload),
-                Encoding.UTF8,
-                "application/json");
+            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, )
+            {
+                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"),
+            };
 
             // Send HTTP request to backend API
             var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.PostAsync(
-                $"{backendApiUrl}/api/agent/refresh-kb-document",
-                jsonContent);
+            var response = await httpClient.SendAsync(httpRequest);
 
             if (response.IsSuccessStatusCode)
             {
