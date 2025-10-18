@@ -9,5 +9,6 @@ public static class VaultKey
     public const string PineconeApiKey = "PineconeApiKey";
     public const string PineconeIndexName = "PineconeIndexName";
     public const string PineconeIndexHost = "PineconeIndexHost";
+    public const string AzureBlobStorageConnectionString = "AzureBlobStorageConnectionString";
 }
 

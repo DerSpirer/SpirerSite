@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Backend.Api.Services.Agent;
+using Backend.Api.Services.BlobStorage;
 using Backend.Api.Services.Embedding;
 using Backend.Api.Services.KnowledgeBase;
 using Backend.Api.Services.VectorDatabase;
@@ -34,6 +35,7 @@ builder.Services.AddHttpClient();
 // Register Secrets Service
 string keyVaultUrl = builder.Configuration["AZURE_KEY_VAULT_URL"] ?? throw new InvalidOperationException("AZURE_KEY_VAULT_URL is not set");
 builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), new DefaultAzureCredential());
+builder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddScoped<IVectorDatabaseService, PineconeVectorDatabaseService>();
 builder.Services.AddScoped<IKnowledgeBaseService, KnowledgeBaseService>();

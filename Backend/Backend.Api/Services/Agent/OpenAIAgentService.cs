@@ -6,6 +6,7 @@ using Backend.Api.Models.OpenAI.Requests;
 using Backend.Api.Models.OpenAI.Objects;
 using Backend.Api.Models.OpenAI.Objects.StreamingEvents;
 using Backend.Api.Models.OpenAI.Converters;
+using Backend.Api.Services.BlobStorage;
 using Backend.Api.Services.KnowledgeBase;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
@@ -43,6 +44,7 @@ public class OpenAIAgentService : IAgentService
     private readonly ILogger<OpenAIAgentService> _logger;
     private readonly HttpClient _httpClient;
     private readonly IKnowledgeBaseService _knowledgeBaseService;
+    private readonly IBlobStorageService _blobStorageService;
     private static readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
     {
         Formatting = Formatting.None,
@@ -56,19 +58,57 @@ public class OpenAIAgentService : IAgentService
     };
     private static readonly JsonSerializer _serializer = JsonSerializer.Create(_serializerSettings);
     private readonly string _apiKey;
+    private string? _systemMessage;
+    private readonly SemaphoreSlim _systemMessageLock = new SemaphoreSlim(1, 1);
 
     public OpenAIAgentService(
         IConfiguration configuration, 
         ILogger<OpenAIAgentService> logger, 
         HttpClient httpClient,
-        IKnowledgeBaseService knowledgeBaseService)
+        IKnowledgeBaseService knowledgeBaseService,
+        IBlobStorageService blobStorageService)
     {
         _logger = logger;
         _httpClient = httpClient;
         _knowledgeBaseService = knowledgeBaseService;
+        _blobStorageService = blobStorageService;
         _apiKey = configuration[VaultKey.OpenAiApiKey]
             ?? throw new InvalidOperationException("OpenAI ApiKey configuration is missing");
         _logger.LogInformation("OpenAIAgentService initialized.");
+    }
+
+    /// <summary>
+    /// Ensures the system message is loaded from blob storage
+    /// </summary>
+    private async Task EnsureSystemMessageLoadedAsync(CancellationToken cancellationToken = default)
+    {
+        if (_systemMessage != null)
+        {
+            return; // Already loaded
+        }
+
+        await _systemMessageLock.WaitAsync(cancellationToken);
+        try
+        {
+            // Double-check after acquiring the lock
+            if (_systemMessage != null)
+            {
+                return;
+            }
+
+            _logger.LogInformation("Loading system message from blob storage");
+            _systemMessage = await _blobStorageService.DownloadBlobAsStringAsync("Prompt.md", cancellationToken);
+            _logger.LogInformation("System message loaded successfully, length: {Length} characters", _systemMessage.Length);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Failed to load system message from blob storage");
+            throw;
+        }
+        finally
+        {
+            _systemMessageLock.Release();
+        }
     }
 
     public async IAsyncEnumerable<ChatResponse> GenerateStreamingResponseAsync(
@@ -77,6 +117,9 @@ public class OpenAIAgentService : IAgentService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Generating streaming response for input with previous response ID: {PreviousResponseId}", previousResponseId);
+
+        // Ensure system message is loaded
+        await EnsureSystemMessageLoadedAsync(cancellationToken);
 
         var inputItems = new List<InputItem> 
         { 
@@ -146,6 +189,7 @@ public class OpenAIAgentService : IAgentService
         {
             input = inputItems,
             previous_response_id = previousResponseId,
+            instructions = _systemMessage,
             tools = new List<Tool>
             {
                 new FunctionTool

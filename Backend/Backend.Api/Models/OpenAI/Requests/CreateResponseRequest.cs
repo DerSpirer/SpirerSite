@@ -31,6 +31,13 @@ public class CreateResponseRequest
     public string? previous_response_id { get; set; }
 
     /// <summary>
+    /// A system (or developer) message inserted into the model's context.
+    /// When using along with previous_response_id, the instructions from a previous response 
+    /// will not be carried over to the next response.
+    /// </summary>
+    public string? instructions { get; set; }
+
+    /// <summary>
     /// If set to true, the model response data will be streamed to the client as it is generated.
     /// </summary>
     public bool stream { get; set; } = true;
