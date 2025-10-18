@@ -2,6 +2,8 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Backend.Api.Services.Agent;
 using Backend.Api.Services.Embedding;
+using Backend.Api.Services.KnowledgeBase;
+using Backend.Api.Services.VectorDatabase;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +35,8 @@ builder.Services.AddHttpClient();
 string keyVaultUrl = builder.Configuration["AZURE_KEY_VAULT_URL"] ?? throw new InvalidOperationException("AZURE_KEY_VAULT_URL is not set");
 builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), new DefaultAzureCredential());
 builder.Services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
+builder.Services.AddScoped<IVectorDatabaseService, PineconeVectorDatabaseService>();
+builder.Services.AddScoped<IKnowledgeBaseService, KnowledgeBaseService>();
 builder.Services.AddScoped<IAgentService, OpenAIAgentService>();
 
 var app = builder.Build();

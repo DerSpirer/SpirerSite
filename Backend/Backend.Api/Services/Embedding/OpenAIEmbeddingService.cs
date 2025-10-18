@@ -1,3 +1,4 @@
+using Backend.Api.Enums;
 using OpenAI;
 using OpenAI.Embeddings;
 
@@ -8,22 +9,21 @@ namespace Backend.Api.Services.Embedding;
 /// </summary>
 public class OpenAIEmbeddingService : IEmbeddingService
 {
+    private const string DefaultEmbeddingModel = "text-embedding-3-small";
+    
     private readonly EmbeddingClient _embeddingClient;
     private readonly ILogger<OpenAIEmbeddingService> _logger;
-    private readonly string _embeddingModel;
 
     public OpenAIEmbeddingService(IConfiguration configuration, ILogger<OpenAIEmbeddingService> logger)
     {
         _logger = logger;
         
-        var apiKey = configuration["OpenAI:ApiKey"] 
+        var apiKey = configuration[VaultKey.OpenAiApiKey] 
             ?? throw new InvalidOperationException("OpenAI:ApiKey configuration is missing");
         
-        _embeddingModel = configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-3-small";
+        _embeddingClient = new EmbeddingClient(DefaultEmbeddingModel, apiKey);
         
-        _embeddingClient = new EmbeddingClient(_embeddingModel, apiKey);
-        
-        _logger.LogInformation("OpenAIEmbeddingService initialized with model: {Model}", _embeddingModel);
+        _logger.LogInformation("OpenAIEmbeddingService initialized.");
     }
 
     /// <inheritdoc />

@@ -1,5 +1,6 @@
 using Backend.Api.Models.Agent;
 using Backend.Api.Services.Agent;
+using Backend.Api.Services.KnowledgeBase;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -13,11 +14,16 @@ namespace Backend.Api.Controllers;
 public class AgentController : ControllerBase
 {
     private readonly IAgentService _agentService;
+    private readonly IKnowledgeBaseService _knowledgeBaseService;
     private readonly ILogger<AgentController> _logger;
 
-    public AgentController(IAgentService agentService, ILogger<AgentController> logger)
+    public AgentController(
+        IAgentService agentService, 
+        IKnowledgeBaseService knowledgeBaseService,
+        ILogger<AgentController> logger)
     {
         _agentService = agentService;
+        _knowledgeBaseService = knowledgeBaseService;
         _logger = logger;
     }
 
@@ -75,9 +81,12 @@ public class AgentController : ControllerBase
     /// Refreshes a knowledge base document by processing and updating it in the vector database
     /// </summary>
     /// <param name="request">The refresh KB document request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Status of the refresh operation</returns>
     [HttpPost("refresh-kb-document")]
-    public IActionResult RefreshKbDocument([FromBody] RefreshKbDocumentRequest request)
+    public async Task<IActionResult> RefreshKbDocument(
+        [FromBody] RefreshKbDocumentRequest request, 
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -93,10 +102,10 @@ public class AgentController : ControllerBase
 
             _logger.LogInformation($"Refreshing KB document: {request.DocumentName}");
 
-            // TODO: Implement the actual refresh logic
-            // 1. Parse/chunk the document content
-            // 2. Generate embeddings for the chunks
-            // 3. Update the vector database with the new embeddings
+            await _knowledgeBaseService.RefreshDocumentAsync(
+                request.DocumentName, 
+                request.Content, 
+                cancellationToken);
 
             _logger.LogInformation($"Successfully refreshed KB document: {request.DocumentName}");
 
