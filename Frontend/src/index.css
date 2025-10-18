@@ -1,0 +1,44 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(
+    135deg,
+    var(--color-slate, #0f172a) 0%,
+    var(--color-fuchsia, #2d1b47) 15%,
+    var(--color-pink, #3d1f47) 30%,
+    var(--color-purple1, #2a1f4a) 45%,
+    var(--color-purple2, #331d52) 60%,
+    var(--color-rose, #3d1d3f) 75%,
+    var(--color-magenta, #401d42) 90%,
+    var(--color-slate, #0f172a) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  overflow: hidden;
+}
