@@ -42,7 +42,7 @@ public class PineconeVectorDatabaseService : IVectorDatabaseService
             {
                 Id = h.Id,
                 Score = h.Score,
-                Content = h.Fields["content"] as string ?? string.Empty,
+                Content = h.Fields["content"]?.ToString() ?? string.Empty,
             }).ToList();
             return results;
         }

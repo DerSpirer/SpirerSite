@@ -1,3 +1,6 @@
+using Backend.Api.Models.OpenAI.Converters;
+using Newtonsoft.Json;
+
 namespace Backend.Api.Models.OpenAI.Requests;
 
 /// <summary>
@@ -7,8 +10,10 @@ public class CreateResponseRequest
 {
     /// <summary>
     /// Array of input items to the model, used to generate a response.
+    /// Can include messages, function call outputs, and other input types.
     /// </summary>
-    public required List<InputMessage> input { get; set; }
+    [JsonProperty(ItemConverterType = typeof(InputItemConverter))]
+    public required List<InputItem> input { get; set; }
 
     /// <summary>
     /// Model ID used to generate the response, like gpt-4o or o3.

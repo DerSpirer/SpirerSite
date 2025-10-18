@@ -48,7 +48,9 @@ export function useStreamingChat() {
         const state = accumulator.getState()
         
         // Update previousResponseId if we receive an Id in the chunk
+        // This handles multiple responses in a single request (e.g., initial + KB tool call response)
         if (chunk.Id) {
+          console.log('Updating response ID:', chunk.Id)
           setPreviousResponseId(chunk.Id)
         }
         

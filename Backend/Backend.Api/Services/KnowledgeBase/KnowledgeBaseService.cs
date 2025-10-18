@@ -68,6 +68,25 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         _logger.LogInformation($"Successfully refreshed document: {documentName}");
     }
 
+    public async Task<List<VectorSearchResult>> QueryAsync(string query, int topK = 5, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation($"Querying knowledge base with query: {query}, topK: {topK}");
+        
+        try
+        {
+            List<VectorSearchResult> results = await _vectorDatabaseService.Search(NAMESPACE_ID, query, topK);
+            
+            _logger.LogInformation($"Found {results.Count} results for query: {query}");
+            
+            return results;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, $"Error querying knowledge base with query: {query}");
+            throw;
+        }
+    }
+
     private List<DocumentChunk> ChunkDocument(string documentName, string content)
     {
         List<DocumentChunk> chunks = new();
