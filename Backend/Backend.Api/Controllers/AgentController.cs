@@ -1,5 +1,7 @@
 using Backend.Api.Models.Agent;
+using Backend.Api.Models.Email;
 using Backend.Api.Services.Agent;
+using Backend.Api.Services.EmailService;
 using Backend.Api.Services.KnowledgeBase;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -15,15 +17,18 @@ public class AgentController : ControllerBase
 {
     private readonly IAgentService _agentService;
     private readonly IKnowledgeBaseService _knowledgeBaseService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<AgentController> _logger;
 
     public AgentController(
         IAgentService agentService, 
         IKnowledgeBaseService knowledgeBaseService,
+        IEmailService emailService,
         ILogger<AgentController> logger)
     {
         _agentService = agentService;
         _knowledgeBaseService = knowledgeBaseService;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -124,6 +129,76 @@ public class AgentController : ControllerBase
             {
                 status = "error",
                 message = "An error occurred while refreshing the KB document",
+                error = exception.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Leaves a message by sending an email
+    /// </summary>
+    /// <param name="request">The message parameters</param>
+    /// <returns>Status of the message operation</returns>
+    [HttpPost("leave-message")]
+    public async Task<IActionResult> LeaveMessage([FromBody] LeaveMessageToolParams request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.fromName))
+            {
+                return BadRequest(new { error = "fromName is required" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.fromEmail))
+            {
+                return BadRequest(new { error = "fromEmail is required" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.subject))
+            {
+                return BadRequest(new { error = "subject is required" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.body))
+            {
+                return BadRequest(new { error = "body is required" });
+            }
+
+            _logger.LogInformation("Leaving message from {FromName} ({FromEmail})", request.fromName, request.fromEmail);
+
+            bool success = await _emailService.LeaveMessage(request);
+
+            if (success)
+            {
+                _logger.LogInformation("Message successfully sent from {FromName} ({FromEmail})", request.fromName, request.fromEmail);
+                
+                return Ok(new
+                {
+                    status = "success",
+                    message = "Message sent successfully",
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                _logger.LogWarning("Failed to send message from {FromName} ({FromEmail})", request.fromName, request.fromEmail);
+                
+                return StatusCode(500, new
+                {
+                    status = "error",
+                    message = "Failed to send message"
+                });
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Error leaving message from {FromName} ({FromEmail})", 
+                request.fromName, request.fromEmail);
+            
+            return StatusCode(500, new
+            {
+                status = "error",
+                message = "An error occurred while sending the message",
                 error = exception.Message
             });
         }

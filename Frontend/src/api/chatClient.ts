@@ -103,19 +103,25 @@ export class ChatApiClient {
 
   /**
    * Leaves a message for Tom (contact form submission)
-   * Note: This endpoint is not yet implemented in the backend
-   * @param _params - Message parameters (currently unused)
+   * @param params - Message parameters
    * @returns Promise that resolves when message is sent
    */
-  async leaveMessage(_params: {
+  async leaveMessage(params: {
     fromName: string
     fromEmail: string
     subject: string
     body: string
   }): Promise<void> {
-    // TODO: Implement backend endpoint for this functionality
-    console.warn('leaveMessage endpoint not yet implemented in backend')
-    throw new Error('Leave message functionality not yet implemented')
+    try {
+      const response = await this.axiosInstance.post(API.ENDPOINTS.LEAVE_MESSAGE, params)
+      
+      if (response.data.status !== 'success') {
+        throw new Error(response.data.message || 'Failed to send message')
+      }
+    } catch (error) {
+      console.error('Error leaving message:', error)
+      throw error
+    }
   }
 }
 

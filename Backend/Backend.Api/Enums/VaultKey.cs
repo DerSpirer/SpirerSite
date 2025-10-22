@@ -10,5 +10,7 @@ public static class VaultKey
     public const string PineconeIndexName = "PineconeIndexName";
     public const string PineconeIndexHost = "PineconeIndexHost";
     public const string AzureBlobStorageConnectionString = "AzureBlobStorageConnectionString";
+    public const string GmailInboxEmail = "GmailInboxEmail";
+    public const string GmailAppPassword = "GmailAppPassword";
 }
 

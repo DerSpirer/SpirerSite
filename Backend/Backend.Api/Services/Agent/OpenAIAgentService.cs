@@ -78,6 +78,18 @@ public class OpenAIAgentService : IAgentService
     }
 
     /// <summary>
+    /// Determines if a tool should be handled by the frontend (for user interaction)
+    /// </summary>
+    private static bool IsFrontendTool(string functionName)
+    {
+        return functionName switch
+        {
+            "leave_message" => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
     /// Ensures the system message is loaded from blob storage
     /// </summary>
     private async Task EnsureSystemMessageLoadedAsync(CancellationToken cancellationToken = default)
@@ -152,34 +164,53 @@ public class OpenAIAgentService : IAgentService
             }
         }
 
-        // If we buffered a function call, execute it and generate a new response
+        // If we buffered a function call, check if it should be handled by backend or frontend
         if (state.FunctionCallBuffer != null && state.FunctionCallBuffer.IsComplete)
         {
-            _logger.LogInformation("Executing buffered function call: {FunctionName}", state.FunctionCallBuffer.Name);
+            string functionName = state.FunctionCallBuffer.Name!;
             
-            // Execute the tool call
-            string toolResult = await ExecuteToolCallAsync(state.FunctionCallBuffer.Name!, state.FunctionCallBuffer.Arguments!, cancellationToken);
-            
-            _logger.LogInformation("Tool call executed, result: {ToolResult}", toolResult);
-
-            // Create a new input list with the function call output
-            var newInputItems = new List<InputItem>(inputItems)
+            // Frontend-handled tools should be sent to the frontend for user interaction
+            if (IsFrontendTool(functionName))
             {
-                new FunctionToolCallOutput
+                _logger.LogInformation("Sending frontend tool call to client: {FunctionName}", functionName);
+                
+                // Yield the tool call to the frontend for user interaction
+                yield return new ChatResponse
                 {
-                    type = "function_call_output",
-                    call_id = state.FunctionCallBuffer.CallId!,
-                    output = toolResult
-                }
-            };
-
-            // Generate a new response with the tool result
-            // Note: The new response will have a different ID, and the frontend will automatically
-            // update to use this new ID for subsequent requests via the ResponseEvent stream
-            _logger.LogInformation("Generating new response with tool result, previous response ID: {PreviousResponseId}", state.CurrentResponseId);
-            await foreach (var chatResponse in GenerateStreamingResponseInternalAsync(newInputItems, state.CurrentResponseId, cancellationToken))
+                    ToolCallId = state.FunctionCallBuffer.CallId,
+                    ToolName = functionName,
+                    ToolArguments = state.FunctionCallBuffer.Arguments
+                };
+            }
+            else
             {
-                yield return chatResponse;
+                // Backend tools are executed immediately
+                _logger.LogInformation("Executing backend tool call: {FunctionName}", functionName);
+                
+                // Execute the tool call
+                string toolResult = await ExecuteToolCallAsync(functionName, state.FunctionCallBuffer.Arguments!, cancellationToken);
+                
+                _logger.LogInformation("Tool call executed, result: {ToolResult}", toolResult);
+
+                // Create a new input list with the function call output
+                var newInputItems = new List<InputItem>(inputItems)
+                {
+                    new FunctionToolCallOutput
+                    {
+                        type = "function_call_output",
+                        call_id = state.FunctionCallBuffer.CallId!,
+                        output = toolResult
+                    }
+                };
+
+                // Generate a new response with the tool result
+                // Note: The new response will have a different ID, and the frontend will automatically
+                // update to use this new ID for subsequent requests via the ResponseEvent stream
+                _logger.LogInformation("Generating new response with tool result, previous response ID: {PreviousResponseId}", state.CurrentResponseId);
+                await foreach (var chatResponse in GenerateStreamingResponseInternalAsync(newInputItems, state.CurrentResponseId, cancellationToken))
+                {
+                    yield return chatResponse;
+                }
             }
         }
     }
@@ -205,6 +236,49 @@ public class OpenAIAgentService : IAgentService
                             }
                         },
                         ""required"": [""query""],
+                        ""additionalProperties"": false
+                    }"),
+                    strict = true
+                },
+                new FunctionTool
+                {
+                    name = "leave_message",
+                    description = @"Send a message from the user to Tom Spirer via email. Before calling this function, you MUST collect each required piece of information individually by asking the user. 
+
+IMPORTANT - Collection Process:
+1. If ANY required field is missing, ask for ONLY ONE missing field at a time
+2. Wait for the user's response with that single piece of information
+3. Then ask for the next missing field, one at a time
+4. Only call this function when ALL four fields are collected: fromName, fromEmail, subject, and body
+
+Required fields to collect one-by-one:
+- fromName: The sender's full name (ask: 'What is your name?')
+- fromEmail: The sender's email address (ask: 'What is your email address?')
+- subject: Brief topic of the message (ask: 'What is the subject of your message?')
+- body: The full message content (ask: 'What would you like to say in your message?')
+
+Only invoke this function after confirming you have received all four pieces of information from the user.",
+                    parameters = JSchema.Parse(@"{
+                        ""type"": ""object"",
+                        ""properties"": {
+                            ""fromName"": {
+                                ""type"": ""string"",
+                                ""description"": ""The full name of the person sending the message""
+                            },
+                            ""fromEmail"": {
+                                ""type"": ""string"",
+                                ""description"": ""The email address of the person sending the message""
+                            },
+                            ""subject"": {
+                                ""type"": ""string"",
+                                ""description"": ""A brief subject line describing the message topic""
+                            },
+                            ""body"": {
+                                ""type"": ""string"",
+                                ""description"": ""The complete message content the user wants to send""
+                            }
+                        },
+                        ""required"": [""fromName"", ""fromEmail"", ""subject"", ""body""],
                         ""additionalProperties"": false
                     }"),
                     strict = true

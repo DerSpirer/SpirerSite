@@ -15,5 +15,6 @@ export const API = {
   BASE_URL: import.meta.env.DEV ? import.meta.env.VITE_API_BASE_URL_LOCALHOST : import.meta.env.VITE_API_BASE_URL_PROD,
   ENDPOINTS: {
     CHAT_STREAM: '/api/agent/chat/stream',
+    LEAVE_MESSAGE: '/api/agent/leave-message',
   },
 } as const;

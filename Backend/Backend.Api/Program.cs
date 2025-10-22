@@ -2,6 +2,7 @@ using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Backend.Api.Services.Agent;
 using Backend.Api.Services.BlobStorage;
+using Backend.Api.Services.EmailService;
 using Backend.Api.Services.Embedding;
 using Backend.Api.Services.KnowledgeBase;
 using Backend.Api.Services.VectorDatabase;
@@ -40,6 +41,7 @@ builder.Services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddScoped<IVectorDatabaseService, PineconeVectorDatabaseService>();
 builder.Services.AddScoped<IKnowledgeBaseService, KnowledgeBaseService>();
 builder.Services.AddScoped<IAgentService, OpenAIAgentService>();
+builder.Services.AddScoped<IEmailService, GmailService>();
 
 var app = builder.Build();
 
